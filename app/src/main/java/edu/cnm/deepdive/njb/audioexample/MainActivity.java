@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity
 
   private void stopRecording() {
     recording = false;
+    toggleRecord.setChecked(false);
   }
 
   private void scheduleStopRecording(final int secondsToRecord) {
@@ -105,10 +106,16 @@ public class MainActivity extends AppCompatActivity
           try {
             Thread.sleep(stopTime - startTime);
           } catch (InterruptedException e) {
-            startTime = System.currentTimeMillis();
+            // Do nothing
           }
+          startTime = System.currentTimeMillis();
         }
-        stopRecording();
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            stopRecording();
+          }
+        });
       }
     }).start();
   }

@@ -26,18 +26,18 @@
     app:layout_constraintStart_toEndOf="@id/toggle_record"
     app:layout_constraintEnd_toStartOf="@+id/record_time"
     app:layout_constraintBaseline_toBaselineOf="@id/toggle_record"
-    app:layout_constraintHorizontal_bias="0.8"/>
+    app:layout_constraintHorizontal_bias="1"/>
 
   <SeekBar
     android:id="@+id/record_time"
-    android:layout_width="wrap_content"
+    android:layout_width="100dp"
     android:layout_height="wrap_content"
     android:min="0"
     android:max="10"
     app:layout_constraintStart_toEndOf="@id/timer_label"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintBottom_toBottomOf="@id/timer_label"
-    app:layout_constraintHorizontal_bias="0.2"/>
+    app:layout_constraintHorizontal_bias="0"/>
 
   <Button
     android:id="@+id/playback"
