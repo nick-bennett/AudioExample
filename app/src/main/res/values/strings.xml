@@ -1,0 +1,10 @@
+<resources>
+  <string name="app_name">Audio Example</string>
+  <string name="erase">Erase</string>
+  <string name="playback">Play</string>
+  <string name="toggle_record_off">Record</string>
+  <string name="toggle_record_on">Stop</string>
+  <string name="timer_label">Timeout</string>
+  <string name="raw_filename_format">%1$tY%1$tm%1$td%1$tH%1$tM%1$tS.raw</string>
+  <string name="wav_filename_format">%1$tY%1$tm%1$td%1$tH%1$tM%1$tS.wav</string>
+</resources>

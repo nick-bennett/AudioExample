@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context="edu.cnm.deepdive.njb.audioexample.MainActivity">
+
+  <ToggleButton
+    android:id="@+id/toggle_record"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textOff="@string/toggle_record_off"
+    android:textOn="@string/toggle_record_on"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/timer_label"
+    app:layout_constraintBottom_toTopOf="@+id/playback"/>
+
+  <TextView
+    android:id="@+id/timer_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/timer_label"
+    app:layout_constraintStart_toEndOf="@id/toggle_record"
+    app:layout_constraintEnd_toStartOf="@+id/record_time"
+    app:layout_constraintBaseline_toBaselineOf="@id/toggle_record"
+    app:layout_constraintHorizontal_bias="0.8"/>
+
+  <SeekBar
+    android:id="@+id/record_time"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:min="0"
+    android:max="10"
+    app:layout_constraintStart_toEndOf="@id/timer_label"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintBottom_toBottomOf="@id/timer_label"
+    app:layout_constraintHorizontal_bias="0.2"/>
+
+  <Button
+    android:id="@+id/playback"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/playback"
+    android:enabled="false"
+    app:layout_constraintTop_toBottomOf="@id/toggle_record"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/erase"
+    app:layout_constraintBottom_toBottomOf="parent"/>
+
+  <Button
+    android:id="@+id/erase"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/erase"
+    android:enabled="false"
+    app:layout_constraintStart_toEndOf="@id/playback"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintBottom_toBottomOf="@id/playback"/>
+
+</android.support.constraint.ConstraintLayout>
