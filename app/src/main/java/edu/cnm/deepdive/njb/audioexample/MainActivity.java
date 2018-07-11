@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity
   private static final int READ_BUFFER_SIZE = 4096;
   private static final int NUM_CHANNELS = 2;            // Change this to 1 for mono.
   private static final int BITS_PER_SAMPLE_PER_CHANNEL = 16;
-
+  private static final int AUDIO_ENCODING_FORMAT = 1;   // Corresponds to PCM.
   private static final int[] AUDIO_FORMAT_CHANNELS = {
       AudioFormat.CHANNEL_IN_MONO,
       AudioFormat.CHANNEL_IN_STEREO
@@ -215,17 +215,16 @@ public class MainActivity extends AppCompatActivity
         byte[] xferBuffer = new byte[READ_BUFFER_SIZE * 2];
         writeWavHeader(output,
             is.getChannel().size(),         // Number of bytes in raw data
-            1,                              // = 1 for PCM
+            AUDIO_ENCODING_FORMAT,          // = 1 for PCM
             NUM_CHANNELS,                   // Number of channels
             SAMPLE_RATE,                    // Samples per second
             BITS_PER_SAMPLE_PER_CHANNEL
         );
         while (true) {
-          int readLength = input
-              .read(xferBuffer, 0, Math.min(input.available(), xferBuffer.length));
+          int readLength = input.read(xferBuffer, 0, Math.min(input.available(), xferBuffer.length));
           if (readLength <= 0) {
             break;
-          } else if (readLength > 0) {
+          } else {
             output.write(xferBuffer, 0, readLength);
           }
         }
