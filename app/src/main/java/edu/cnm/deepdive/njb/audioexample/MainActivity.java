@@ -1,9 +1,10 @@
 package edu.cnm.deepdive.njb.audioexample;
 
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder.AudioSource;
+import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -24,8 +26,10 @@ import java.io.OutputStream;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity
-    implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+    implements View.OnClickListener, CompoundButton.OnCheckedChangeListener,
+    SeekBar.OnSeekBarChangeListener {
 
+  private static final int DEFAULT_RECORD_TIME = 0;
   private static final int SAMPLE_RATE = 44100;         // Set as appropriate
   private static final int RECORD_BUFFER_MULTIPLIER = 4;
   private static final int READ_BUFFER_SIZE = 4096;
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity
 
   private ToggleButton toggleRecord;
   private SeekBar recordTime;
+  private TextView recordTimeText;
   private Button playback;
   private Button erase;
   private File file = null;
@@ -51,11 +56,14 @@ public class MainActivity extends AppCompatActivity
     setContentView(R.layout.activity_main);
     toggleRecord = findViewById(R.id.toggle_record);
     recordTime = findViewById(R.id.record_time);
+    recordTimeText = findViewById(R.id.record_time_text);
     playback = findViewById(R.id.playback);
     erase = findViewById(R.id.erase);
     toggleRecord.setOnCheckedChangeListener(this);
+    recordTime.setOnSeekBarChangeListener(this);
     playback.setOnClickListener(this);
     erase.setOnClickListener(this);
+    recordTime.setProgress(DEFAULT_RECORD_TIME);
   }
 
   @Override
@@ -66,6 +74,17 @@ public class MainActivity extends AppCompatActivity
       stopRecording();
     }
   }
+
+  @Override
+  public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    recordTimeText.setText(getString(R.string.record_time_text, progress));
+  }
+
+  @Override
+  public void onStartTrackingTouch(SeekBar seekBar) {}
+
+  @Override
+  public void onStopTrackingTouch(SeekBar seekBar) {}
 
   @Override
   public void onClick(View v) {
@@ -102,32 +121,56 @@ public class MainActivity extends AppCompatActivity
       public void run() {
         long startTime = System.currentTimeMillis();
         long stopTime = startTime + secondsToRecord * 1000L;
-        while (stopTime > startTime) {
+        while (stopTime > startTime && recording) {
           try {
-            Thread.sleep(stopTime - startTime);
+            Thread.sleep(Math.min(stopTime - startTime, 100));
           } catch (InterruptedException e) {
             // Do nothing
           }
           startTime = System.currentTimeMillis();
         }
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            stopRecording();
-          }
-        });
+        if (recording) {
+          runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              stopRecording();
+            }
+          });
+        }
       }
     }).start();
   }
 
   private void play() {
+    class Listener implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+      @Override
+      public void onPrepared(MediaPlayer player) {
+        enableControls(false);
+        player.start();
+      }
+      @Override
+      public void onCompletion(MediaPlayer player) {
+        player.release();
+        enableControls(true);
+      }
+    }
     if (file != null && file.exists()) {
       MediaPlayer player = null;
       try {
         Uri location = Uri.fromFile(file);
-        player = MediaPlayer.create(this, location);
-        player.start();
-      } finally {
+        Listener listener = new Listener();
+        AudioAttributes attributes = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+            .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+            .build();
+        player = new MediaPlayer();
+        player.setDataSource(this, location);
+        player.setAudioAttributes(attributes);
+        player.setVolume(1, 1);
+        player.setOnPreparedListener(listener);
+        player.setOnCompletionListener(listener);
+        player.prepareAsync();
+      } catch (IOException e) {
         if (player != null) {
           player.release();
         }
@@ -184,7 +227,7 @@ public class MainActivity extends AppCompatActivity
         short[] readBuffer = new short[READ_BUFFER_SIZE];
         byte[] writeBuffer = new byte[READ_BUFFER_SIZE * 2];
 
-        record = new AudioRecord(AudioSource.MIC, SAMPLE_RATE,
+        record = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
             AUDIO_FORMAT_CHANNELS[NUM_CHANNELS - 1], AudioFormat.ENCODING_PCM_16BIT,
             RECORD_BUFFER_MULTIPLIER * AudioRecord.getMinBufferSize(SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT));
